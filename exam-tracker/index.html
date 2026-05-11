@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exam Tracker · May 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0e;
+    --surface: #161618;
+    --surface-2: #1e1e21;
+    --border: #2a2a2d;
+    --border-strong: #3a3a3e;
+    --text: #f0ede5;
+    --text-2: #8a8580;
+    --text-3: #55524c;
+    --accent: #f5a04a;
+    --accent-dim: #f5a04a26;
+    --accent-text: #ffb872;
+    --success: #7fb069;
+    --success-dim: #7fb06922;
+    --danger: #d77a61;
+    --danger-dim: #d77a6122;
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'Geist', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', 'Menlo', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding: 32px 24px 80px;
+    max-width: 920px;
+    margin: 0 auto;
+  }
+  ::selection { background: var(--accent); color: var(--bg); }
+
+  /* HERO */
+  .hero { margin-bottom: 64px; position: relative; }
+  .hero-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(48px, 8vw, 88px);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .hero h1 .italic { font-style: italic; color: var(--accent); }
+  .hero-subtitle {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--text-2);
+    font-style: italic;
+    margin-bottom: 48px;
+  }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .stat { background: var(--surface); padding: 20px 18px; }
+  .stat-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; }
+  .stat-value { font-family: var(--serif); font-size: 40px; line-height: 1; }
+  .stat-value .small { font-size: 18px; color: var(--text-2); }
+  .stat-unit { font-family: var(--mono); font-size: 11px; color: var(--text-2); margin-top: 6px; }
+  .stat.accent .stat-value { color: var(--accent); }
+
+  .progress-bar { height: 3px; background: var(--surface-2); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s ease; }
+  .progress-fill.success { background: var(--success); }
+
+  /* SECTION HEADERS */
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 24px; padding-top: 8px; }
+  .section-title { font-family: var(--serif); font-size: 32px; font-weight: 400; line-height: 1; }
+  .section-title .italic { font-style: italic; color: var(--accent); }
+  .section-meta { font-family: var(--mono); font-size: 11px; color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* TODAY */
+  .today {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 28px 28px 24px;
+    margin-bottom: 64px;
+    position: relative;
+    overflow: hidden;
+  }
+  .today::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle at top right, var(--accent-dim), transparent 70%);
+    pointer-events: none;
+  }
+  .today-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .today-date {
+    font-family: var(--serif);
+    font-size: 36px;
+    line-height: 1;
+    margin-bottom: 4px;
+    position: relative;
+  }
+  .today-date .italic { font-style: italic; color: var(--text-2); }
+  .today-status {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-2);
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .today-sessions { position: relative; }
+  .today.done { border-color: var(--success); }
+  .today.done .today-label { color: var(--success); }
+  .today.done::before { background: radial-gradient(circle at top right, var(--success-dim), transparent 70%); }
+
+  /* DAY GROUPS */
+  .day-group { margin-bottom: 32px; }
+  .day-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 14px 0 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .day-date {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1;
+  }
+  .day-date .italic { font-style: italic; color: var(--text-2); }
+  .day-date.is-today { color: var(--accent); }
+  .day-date.is-past { color: var(--text-3); }
+  .day-meta { font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+
+  /* SESSIONS */
+  .session {
+    display: grid;
+    grid-template-columns: auto 80px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 4px;
+    border-radius: 3px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease;
+  }
+  .session:hover { background: var(--surface); }
+  .session .check {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .session.done .check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .session.done .check::after {
+    content: '';
+    width: 5px; height: 9px;
+    border: solid var(--bg);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translateY(-1px);
+  }
+  .session-time {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-2);
+    letter-spacing: -0.02em;
+  }
+  .session-title {
+    font-size: 14px;
+    color: var(--text);
+  }
+  .session.done .session-title { color: var(--text-3); text-decoration: line-through; text-decoration-thickness: 1px; text-decoration-color: var(--text-3); }
+  .session.done .session-time { color: var(--text-3); }
+  .session-subject {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    padding: 3px 7px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+  .session.is-exam {
+    background: var(--danger-dim);
+    border-left: 2px solid var(--danger);
+    padding-left: 12px;
+  }
+  .session.is-exam .session-subject { color: var(--danger); border-color: var(--danger); }
+  .session.is-exam.done { background: var(--success-dim); border-left-color: var(--success); }
+
+  /* TOPIC CHECKLISTS */
+  .topic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; margin-top: 12px; }
+  @media (max-width: 600px) { .topic-grid { grid-template-columns: 1fr; } }
+  .topic {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 4px;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 3px;
+    transition: background 0.15s ease;
+  }
+  .topic:hover { background: var(--surface); }
+  .topic .check {
+    width: 14px; height: 14px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .topic.done .check { background: var(--accent); border-color: var(--accent); }
+  .topic.done .check::after {
+    content: '';
+    width: 3.5px; height: 7px;
+    border: solid var(--bg);
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg) translateY(-1px);
+  }
+  .topic-name { font-size: 13px; color: var(--text); }
+  .topic.done .topic-name { color: var(--text-3); text-decoration: line-through; text-decoration-color: var(--text-3); }
+  .topic.is-sub { padding-left: 20px; }
+  .topic.is-sub .topic-name { color: var(--text-2); font-size: 12px; }
+
+  .subject-section { margin-bottom: 48px; }
+  .subject-progress {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-2);
+    margin-top: 4px;
+  }
+
+  /* RESET BUTTON */
+  .reset-btn {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    color: var(--text-2);
+    padding: 8px 14px;
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.2s ease;
+  }
+  .reset-btn:hover { color: var(--danger); border-color: var(--danger); }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-label">Exam Season · May 11 → May 26, 2026</div>
+  <h1>The next <span class="italic">sixteen</span> days.</h1>
+  <p class="hero-subtitle">seven exams. one plan. one tick at a time.</p>
+
+  <div class="stats">
+    <div class="stat accent">
+      <div class="stat-label">First exam in</div>
+      <div class="stat-value" id="countdown">—</div>
+      <div class="stat-unit">days</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Overall</div>
+      <div class="stat-value"><span id="overall-pct">0</span><span class="small">%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="overall-bar" style="width:0%"></div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Math</div>
+      <div class="stat-value"><span id="math-pct">0</span><span class="small">%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="math-bar" style="width:0%"></div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">WAP</div>
+      <div class="stat-value"><span id="wap-pct">0</span><span class="small">%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="wap-bar" style="width:0%"></div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">DSA</div>
+      <div class="stat-value"><span id="dsa-pct">0</span><span class="small">%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="dsa-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+</header>
+
+<section class="today" id="today-section">
+  <div class="today-label">Today's focus</div>
+  <div class="today-date" id="today-date">—</div>
+  <div class="today-status" id="today-status">Loading…</div>
+  <div class="today-sessions" id="today-sessions"></div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2 class="section-title">Phase one — <span class="italic">build</span></h2>
+    <div class="section-meta">May 11 → May 17</div>
+  </div>
+  <div id="phase-1"></div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2 class="section-title">Phase two — <span class="italic">exam week</span></h2>
+    <div class="section-meta">May 18 → May 22</div>
+  </div>
+  <div id="phase-2"></div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2 class="section-title">Phase three — <span class="italic">final sprint</span></h2>
+    <div class="section-meta">May 23 → May 26</div>
+  </div>
+  <div id="phase-3"></div>
+</section>
+
+<section class="subject-section" style="margin-top: 64px;">
+  <div class="section-head">
+    <h2 class="section-title">Math <span class="italic">syllabus</span></h2>
+    <div class="section-meta" id="math-topic-meta">0 / 0</div>
+  </div>
+  <div class="topic-grid" id="math-topics"></div>
+</section>
+
+<section class="subject-section">
+  <div class="section-head">
+    <h2 class="section-title">WAP <span class="italic">syllabus</span></h2>
+    <div class="section-meta" id="wap-topic-meta">0 / 0</div>
+  </div>
+  <div class="topic-grid" id="wap-topics"></div>
+</section>
+
+<section class="subject-section">
+  <div class="section-head">
+    <h2 class="section-title">DSA <span class="italic">syllabus</span></h2>
+    <div class="section-meta" id="dsa-topic-meta">0 / 0</div>
+  </div>
+  <div class="topic-grid" id="dsa-topics"></div>
+</section>
+
+<div class="footer">good luck, Ronak · one tick at a time</div>
+
+<button class="reset-btn" id="reset-btn" title="Clear all progress">reset progress</button>
+
+<script>
+// ==================== DATA ====================
+
+const SESSIONS = [
+  // Phase 1 - Build
+  { id: 'd1-1', date: '2026-05-11', time: '09:00–12:00', subject: 'MATH', title: 'Counting + Intro to Probability', phase: 1 },
+  { id: 'd1-2', date: '2026-05-11', time: '13:00–15:00', subject: 'DSA', title: 'PSP review + Time/Space Complexity', phase: 1 },
+  { id: 'd1-3', date: '2026-05-11', time: '16:00–18:00', subject: 'WAP', title: 'JS fundamentals (types, conditionals, loops, functions)', phase: 1 },
+  { id: 'd1-4', date: '2026-05-11', time: '19:00–20:00', subject: 'FSTE', title: 'FSTE — light skim', phase: 1 },
+
+  { id: 'd2-1', date: '2026-05-12', time: '09:00–12:00', subject: 'MATH', title: 'Conditional probability, Independence, Bayes', phase: 1 },
+  { id: 'd2-2', date: '2026-05-12', time: '13:00–15:00', subject: 'DSA', title: 'Brute force, Complete search, Sorting', phase: 1 },
+  { id: 'd2-3', date: '2026-05-12', time: '16:00–18:00', subject: 'WAP', title: 'HOF, callbacks, arrays, objects', phase: 1 },
+  { id: 'd2-4', date: '2026-05-12', time: '19:00–20:00', subject: 'TNP', title: 'TnP — light skim', phase: 1 },
+
+  { id: 'd3-1', date: '2026-05-13', time: '09:00–12:00', subject: 'MATH', title: 'Random variables, Expectation', phase: 1 },
+  { id: 'd3-2', date: '2026-05-13', time: '13:00–15:00', subject: 'WAP', title: 'Spread/rest, APIs, Fetch, async/await, modules', phase: 1 },
+  { id: 'd3-3', date: '2026-05-13', time: '16:00–18:00', subject: 'DSA', title: 'Binary search, Recursion', phase: 1 },
+  { id: 'd3-4', date: '2026-05-13', time: '19:00–20:00', subject: 'SNS', title: 'S&S — light skim', phase: 1 },
+
+  { id: 'd4-1', date: '2026-05-14', time: '09:00–12:00', subject: 'MATH', title: 'All discrete distributions (Bernoulli → Discrete Uniform)', phase: 1 },
+  { id: 'd4-2', date: '2026-05-14', time: '13:00–15:00', subject: 'WAP', title: 'React intro, JSX, conditional rendering, styling', phase: 1 },
+  { id: 'd4-3', date: '2026-05-14', time: '16:00–18:00', subject: 'DSA', title: 'OOPS + Stack', phase: 1 },
+  { id: 'd4-4', date: '2026-05-14', time: '19:00–20:30', subject: 'DESIGN', title: 'Design Jury prep', phase: 1 },
+
+  { id: 'd5-1', date: '2026-05-15', time: '09:00–12:00', subject: 'MATH', title: 'Multiple RVs, calculus, Continuous Uniform + Exponential', phase: 1 },
+  { id: 'd5-2', date: '2026-05-15', time: '13:00–15:00', subject: 'WAP', title: 'Components, props, sharing data, controlled inputs', phase: 1 },
+  { id: 'd5-3', date: '2026-05-15', time: '16:00–18:00', subject: 'DSA', title: 'Merge sort + Linked list', phase: 1 },
+  { id: 'd5-4', date: '2026-05-15', time: '19:00–20:00', subject: 'FSTE', title: 'FSTE notes review', phase: 1 },
+
+  { id: 'd6-1', date: '2026-05-16', time: '09:00–12:00', subject: 'MATH', title: 'Normal & Standard Normal, Z-scores', phase: 1 },
+  { id: 'd6-2', date: '2026-05-16', time: '13:00–15:00', subject: 'WAP', title: 'useState, useEffect, API fetch in React', phase: 1 },
+  { id: 'd6-3', date: '2026-05-16', time: '16:00–18:00', subject: 'DSA', title: 'Binary tree traversals + problems', phase: 1 },
+  { id: 'd6-4', date: '2026-05-16', time: '19:00–20:30', subject: 'DESIGN', title: 'Design Jury — final prep', phase: 1 },
+
+  { id: 'd7-1', date: '2026-05-17', time: '09:00–13:00', subject: 'FSTE', title: 'FSTE — full content review', phase: 1 },
+  { id: 'd7-2', date: '2026-05-17', time: '14:00–17:00', subject: 'FSTE', title: 'FSTE — practice MCQs + weak spots', phase: 1 },
+  { id: 'd7-3', date: '2026-05-17', time: '18:00–19:00', subject: 'MATH', title: 'Statistics intro (sample stat, dispersion, box plot)', phase: 1 },
+  { id: 'd7-4', date: '2026-05-17', time: '19:30–20:30', subject: 'DSA', title: 'Pattern flash review', phase: 1 },
+
+  // Phase 2 - Exam week
+  { id: 'd8-1', date: '2026-05-18', time: '08:00–09:30', subject: 'FSTE', title: 'FSTE final flip', phase: 2 },
+  { id: 'd8-2', date: '2026-05-18', time: '10:00–13:00', subject: 'EXAM', title: 'FSTE exam (Code Tantra)', phase: 2, isExam: true },
+  { id: 'd8-3', date: '2026-05-18', time: '14:30–17:30', subject: 'DESIGN', title: 'Design Jury — full prep', phase: 2 },
+  { id: 'd8-4', date: '2026-05-18', time: '18:30–20:00', subject: 'MATH', title: 'Covariance + Correlation', phase: 2 },
+
+  { id: 'd9-1', date: '2026-05-19', time: '10:00–13:00', subject: 'EXAM', title: 'Design Jury — Part 1', phase: 2, isExam: true },
+  { id: 'd9-2', date: '2026-05-19', time: '14:00–17:00', subject: 'EXAM', title: 'Design Jury — Part 2', phase: 2, isExam: true },
+  { id: 'd9-3', date: '2026-05-19', time: '18:00–22:00', subject: 'TNP', title: 'TnP cram (full sweep + MCQs)', phase: 2 },
+
+  { id: 'd10-1', date: '2026-05-20', time: '08:00–09:30', subject: 'TNP', title: 'TnP final flip', phase: 2 },
+  { id: 'd10-2', date: '2026-05-20', time: '10:00–13:00', subject: 'EXAM', title: 'TnP exam (Code Tantra)', phase: 2, isExam: true },
+  { id: 'd10-3', date: '2026-05-20', time: '14:30–17:00', subject: 'SNS', title: 'Self & Society cram', phase: 2 },
+  { id: 'd10-4', date: '2026-05-20', time: '18:00–21:00', subject: 'MATH', title: 'LLN, Sampling distribution, CLT', phase: 2 },
+
+  { id: 'd11-1', date: '2026-05-21', time: '08:00–09:30', subject: 'SNS', title: 'S&S final flip', phase: 2 },
+  { id: 'd11-2', date: '2026-05-21', time: '10:00–13:00', subject: 'EXAM', title: 'Self & Society II exam (Code Tantra)', phase: 2, isExam: true },
+  { id: 'd11-3', date: '2026-05-21', time: '14:00–16:00', subject: 'MATH', title: 'Estimators (Point, Unbiased, MLE)', phase: 2 },
+  { id: 'd11-4', date: '2026-05-21', time: '17:00–19:00', subject: 'MATH', title: 'Math FULL MOCK (timed, pen & paper)', phase: 2 },
+  { id: 'd11-5', date: '2026-05-21', time: '19:30–21:00', subject: 'MATH', title: 'Math weak topic review', phase: 2 },
+
+  { id: 'd12-1', date: '2026-05-22', time: '08:00–09:30', subject: 'MATH', title: 'Math formula sheet review (no new problems)', phase: 2 },
+  { id: 'd12-2', date: '2026-05-22', time: '10:00–13:00', subject: 'EXAM', title: 'MATH-II EXAM (Pen & Paper, Major)', phase: 2, isExam: true },
+  { id: 'd12-3', date: '2026-05-22', time: '16:00–19:00', subject: 'WAP', title: 'WAP deep review (JS + React)', phase: 2 },
+  { id: 'd12-4', date: '2026-05-22', time: '20:00–21:00', subject: 'DSA', title: 'DSA warm-up', phase: 2 },
+
+  // Phase 3 - Final sprint
+  { id: 'd13-1', date: '2026-05-23', time: '09:00–12:00', subject: 'WAP', title: 'WAP — React app build (fetch + hooks)', phase: 3 },
+  { id: 'd13-2', date: '2026-05-23', time: '13:00–15:00', subject: 'WAP', title: 'WAP exam-format problems', phase: 3 },
+  { id: 'd13-3', date: '2026-05-23', time: '16:00–18:00', subject: 'DSA', title: 'DSA — sorting, binary search, recursion', phase: 3 },
+  { id: 'd13-4', date: '2026-05-23', time: '19:00–21:00', subject: 'DSA', title: 'DSA — stack + linked list problems', phase: 3 },
+
+  { id: 'd14-1', date: '2026-05-24', time: '09:00–12:00', subject: 'WAP', title: 'WAP timed mock (full syllabus)', phase: 3 },
+  { id: 'd14-2', date: '2026-05-24', time: '13:00–15:00', subject: 'WAP', title: 'WAP gap-fill on weak areas', phase: 3 },
+  { id: 'd14-3', date: '2026-05-24', time: '16:00–18:00', subject: 'DSA', title: 'DSA — binary tree problems', phase: 3 },
+  { id: 'd14-4', date: '2026-05-24', time: '19:00–21:00', subject: 'DSA', title: 'DSA — OOPS + mixed practice', phase: 3 },
+
+  { id: 'd15-1', date: '2026-05-25', time: '08:00–09:30', subject: 'WAP', title: 'WAP cheat sheet review', phase: 3 },
+  { id: 'd15-2', date: '2026-05-25', time: '10:00–13:00', subject: 'EXAM', title: 'WAP exam (Computer Based, Major)', phase: 3, isExam: true },
+  { id: 'd15-3', date: '2026-05-25', time: '14:00–16:00', subject: 'DSA', title: 'DSA mixed problems (Code Tantra format)', phase: 3 },
+  { id: 'd15-4', date: '2026-05-25', time: '17:00–19:00', subject: 'DSA', title: 'DSA pattern flash + complexity', phase: 3 },
+  { id: 'd15-5', date: '2026-05-25', time: '19:30–21:00', subject: 'DSA', title: 'DSA last weak topics', phase: 3 },
+
+  { id: 'd16-1', date: '2026-05-26', time: '08:00–09:30', subject: 'DSA', title: 'DSA patterns + complexity glance', phase: 3 },
+  { id: 'd16-2', date: '2026-05-26', time: '10:00–13:00', subject: 'EXAM', title: 'DSA exam — FINAL (Computer Based, Major)', phase: 3, isExam: true },
+];
+
+const TOPICS = {
+  math: [
+    'Counting I', 'Counting II',
+    'Intro to Probability', 'Conditional probability & Independence',
+    'Bayes\' Theorem', 'Random variable',
+    'Mathematical Expectation', 'Bernoulli Distribution',
+    'Binomial Distribution', 'Poisson Distribution',
+    'Geometric Distribution', 'Discrete Uniform Distribution',
+    'Multiple discrete Random variable', 'Basic Calculus',
+    'Continuous Uniform Distribution', 'Exponential Distribution',
+    'Normal Distribution', 'Standard Normal Distribution',
+    'Sample Statistic & Population Parameter', 'Sampling',
+    'Measures of Dispersion', 'Box plot',
+    'Covariance', 'Correlation',
+    'Law of Large Numbers', 'Sampling Distribution',
+    'Central Limit Theorem', 'Point estimator',
+    'Unbiased Estimator', 'Maximum Likelihood Estimator (Discrete)'
+  ],
+  wap: [
+    'JS — Data types', 'JS — Conditionals',
+    'JS — Loops', 'JS — Functions',
+    'JS — Higher-order functions', 'JS — Arrays',
+    'JS — Objects', 'JS — Callback functions',
+    'JS — Spread & Rest operators', 'JS — APIs',
+    'JS — Fetch API', 'JS — Async / Await',
+    'JS — Modules', 'JS — npm',
+    'React — Introduction', 'React — JSX',
+    'React — Conditional rendering', 'React — Styling',
+    'React — Components & Props', 'React — Sharing data',
+    'React — Controlled components', 'React — API fetch',
+    'React — useState', 'React — useEffect'
+  ],
+  dsa: [
+    'Entire PSP syllabus', 'Brute force',
+    'Time & Space Complexity', 'Complete Search',
+    'Sorting', 'Binary Search',
+    'Recursion', 'OOPS',
+    'Stack', 'Merge Sort',
+    'Linked List', 'Binary Tree'
+  ]
+};
+
+// ==================== STORAGE (dual-mode) ====================
+// Uses window.storage (Claude artifact) if present, else localStorage (downloaded HTML)
+
+const StorageMode = (typeof window !== 'undefined' && window.storage) ? 'claude' : 'local';
+const KEY = 'ronak_exam_tracker_v1';
+
+async function loadState() {
+  try {
+    if (StorageMode === 'claude') {
+      const res = await window.storage.get(KEY);
+      if (res && res.value) return JSON.parse(res.value);
+      return { sessions: {}, topics: {} };
+    } else {
+      const raw = localStorage.getItem(KEY);
+      return raw ? JSON.parse(raw) : { sessions: {}, topics: {} };
+    }
+  } catch (e) {
+    return { sessions: {}, topics: {} };
+  }
+}
+
+async function saveState(state) {
+  try {
+    const json = JSON.stringify(state);
+    if (StorageMode === 'claude') {
+      await window.storage.set(KEY, json);
+    } else {
+      localStorage.setItem(KEY, json);
+    }
+  } catch (e) {
+    console.warn('Save failed:', e);
+  }
+}
+
+// ==================== HELPERS ====================
+
+const SUBJECT_COLORS = {
+  MATH: 'math', WAP: 'wap', DSA: 'dsa',
+  FSTE: 'theory', TNP: 'theory', SNS: 'theory',
+  DESIGN: 'theory', EXAM: 'exam'
+};
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function parseDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function todayISO() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function daysBetween(d1, d2) {
+  const ms = parseDate(d2) - parseDate(d1);
+  return Math.round(ms / (1000 * 60 * 60 * 24));
+}
+
+function formatDate(dateStr) {
+  const d = parseDate(dateStr);
+  return { day: DAYS[d.getDay()], num: d.getDate(), month: MONTHS[d.getMonth()] };
+}
+
+// ==================== RENDER ====================
+
+let state = { sessions: {}, topics: {} };
+
+function sessionEl(s, options = {}) {
+  const el = document.createElement('div');
+  el.className = 'session';
+  if (state.sessions[s.id]) el.classList.add('done');
+  if (s.isExam) el.classList.add('is-exam');
+  el.dataset.id = s.id;
+
+  el.innerHTML = `
+    <div class="check"></div>
+    <div class="session-time">${s.time}</div>
+    <div class="session-title">${s.title}</div>
+    <div class="session-subject">${s.subject}</div>
+  `;
+
+  el.addEventListener('click', () => toggleSession(s.id, el));
+  return el;
+}
+
+async function toggleSession(id, el) {
+  state.sessions[id] = !state.sessions[id];
+  el.classList.toggle('done', !!state.sessions[id]);
+  await saveState(state);
+  updateStats();
+  renderToday();
+}
+
+function topicEl(subject, name, idx) {
+  const id = `${subject}-${idx}`;
+  const el = document.createElement('div');
+  el.className = 'topic';
+  if (state.topics[id]) el.classList.add('done');
+  el.innerHTML = `<div class="check"></div><div class="topic-name">${name}</div>`;
+  el.addEventListener('click', async () => {
+    state.topics[id] = !state.topics[id];
+    el.classList.toggle('done', !!state.topics[id]);
+    await saveState(state);
+    updateTopicMeta();
+  });
+  return el;
+}
+
+function renderPhase(phaseNum) {
+  const container = document.getElementById(`phase-${phaseNum}`);
+  container.innerHTML = '';
+  const today = todayISO();
+
+  // Group by date
+  const sessionsByDate = {};
+  SESSIONS.filter(s => s.phase === phaseNum).forEach(s => {
+    if (!sessionsByDate[s.date]) sessionsByDate[s.date] = [];
+    sessionsByDate[s.date].push(s);
+  });
+
+  Object.entries(sessionsByDate).forEach(([date, sessions]) => {
+    const group = document.createElement('div');
+    group.className = 'day-group';
+
+    const fd = formatDate(date);
+    const isToday = date === today;
+    const isPast = parseDate(date) < parseDate(today);
+    const completed = sessions.filter(s => state.sessions[s.id]).length;
+
+    const header = document.createElement('div');
+    header.className = 'day-header';
+    let dateClass = '';
+    if (isToday) dateClass = 'is-today';
+    else if (isPast) dateClass = 'is-past';
+    header.innerHTML = `
+      <div class="day-date ${dateClass}">${fd.day}, <span class="italic">${fd.month}</span> ${fd.num}${isToday ? ' · today' : ''}</div>
+      <div class="day-meta">${completed} / ${sessions.length}</div>
+    `;
+    group.appendChild(header);
+
+    sessions.forEach(s => group.appendChild(sessionEl(s)));
+    container.appendChild(group);
+  });
+}
+
+function renderToday() {
+  const today = todayISO();
+  const todaySessions = SESSIONS.filter(s => s.date === today);
+  const fd = formatDate(today);
+  const dateEl = document.getElementById('today-date');
+  const statusEl = document.getElementById('today-status');
+  const container = document.getElementById('today-sessions');
+  const todayCard = document.getElementById('today-section');
+
+  dateEl.innerHTML = `${fd.day}, <span class="italic">${fd.month}</span> ${fd.num}`;
+  container.innerHTML = '';
+
+  if (todaySessions.length === 0) {
+    // Could be before plan starts or after all exams
+    const planStart = '2026-05-11';
+    const planEnd = '2026-05-26';
+    if (today < planStart) {
+      statusEl.textContent = 'Plan begins May 11. Rest while you can.';
+    } else if (today > planEnd) {
+      statusEl.textContent = 'All exams complete. You did it.';
+      todayCard.classList.add('done');
+    } else {
+      statusEl.textContent = 'Buffer day. Rest, eat, sleep.';
+    }
+    return;
+  }
+
+  const done = todaySessions.filter(s => state.sessions[s.id]).length;
+  statusEl.innerHTML = `<span style="font-family: var(--mono); color: var(--accent);">${done} of ${todaySessions.length}</span> sessions complete`;
+
+  if (done === todaySessions.length) {
+    todayCard.classList.add('done');
+    statusEl.innerHTML = `<span style="font-family: var(--mono); color: var(--success);">${done} of ${todaySessions.length}</span> · all done for today`;
+  } else {
+    todayCard.classList.remove('done');
+  }
+
+  todaySessions.forEach(s => container.appendChild(sessionEl(s)));
+}
+
+function renderTopics() {
+  ['math', 'wap', 'dsa'].forEach(subject => {
+    const container = document.getElementById(`${subject}-topics`);
+    container.innerHTML = '';
+    TOPICS[subject].forEach((name, idx) => {
+      container.appendChild(topicEl(subject, name, idx));
+    });
+  });
+}
+
+function updateTopicMeta() {
+  ['math', 'wap', 'dsa'].forEach(subject => {
+    const total = TOPICS[subject].length;
+    const done = TOPICS[subject].filter((_, idx) => state.topics[`${subject}-${idx}`]).length;
+    document.getElementById(`${subject}-topic-meta`).textContent = `${done} / ${total}`;
+  });
+}
+
+function updateStats() {
+  const today = todayISO();
+  const firstExam = '2026-05-18';
+  const daysUntil = daysBetween(today, firstExam);
+  const cd = document.getElementById('countdown');
+  if (daysUntil > 0) {
+    cd.textContent = daysUntil;
+  } else if (daysUntil === 0) {
+    cd.innerHTML = '<span class="small">today</span>';
+  } else if (today <= '2026-05-26') {
+    cd.innerHTML = '<span class="small">in progress</span>';
+  } else {
+    cd.innerHTML = '<span class="small">done!</span>';
+  }
+
+  const total = SESSIONS.length;
+  const done = SESSIONS.filter(s => state.sessions[s.id]).length;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('overall-pct').textContent = pct;
+  document.getElementById('overall-bar').style.width = pct + '%';
+  if (pct >= 100) document.getElementById('overall-bar').classList.add('success');
+
+  ['MATH', 'WAP', 'DSA'].forEach(subj => {
+    const subjSessions = SESSIONS.filter(s => s.subject === subj);
+    const subjDone = subjSessions.filter(s => state.sessions[s.id]).length;
+    const subjPct = subjSessions.length ? Math.round((subjDone / subjSessions.length) * 100) : 0;
+    const key = subj.toLowerCase();
+    document.getElementById(`${key}-pct`).textContent = subjPct;
+    document.getElementById(`${key}-bar`).style.width = subjPct + '%';
+  });
+}
+
+// ==================== INIT ====================
+
+async function init() {
+  state = await loadState();
+  renderToday();
+  renderPhase(1);
+  renderPhase(2);
+  renderPhase(3);
+  renderTopics();
+  updateTopicMeta();
+  updateStats();
+
+  document.getElementById('reset-btn').addEventListener('click', async () => {
+    if (confirm('Reset all progress? This cannot be undone.')) {
+      state = { sessions: {}, topics: {} };
+      await saveState(state);
+      location.reload();
+    }
+  });
+}
+
+init();
+</script>
+
+</body>
+</html>
